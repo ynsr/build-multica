@@ -13,16 +13,16 @@
 ## Implementation Backlog
 
 ### Pending
-- [ ] `01-create-squad-instructions.md`: Create the high-level routing controller and protocols in `design-v1/squad-instructions.md`.
-- [ ] `02-create-leader-agent.md`: Implement the Squad Leader `leader.md` agent for coordination.
-- [ ] `03-create-analyst-agent.md`: Implement the `analyst.md` agent for conversational interviewing and writing high-level `design.md` files.
-- [ ] `04-create-planner-agent.md`: Implement the `planner.md` agent for generating step-by-step breakdowns and verifying alignment.
+- (None)
 
 ### Current
 - (None)
 
 ### Completed
-- (None)
+- [x] `01-create-squad-instructions.md`: Create the high-level routing controller and protocols in `design-v1/squad-instructions.md`.
+- [x] `02-create-leader-agent.md`: Implement the Squad Leader `leader.md` agent for coordination.
+- [x] `03-create-analyst-agent.md`: Implement the `analyst.md` agent for conversational interviewing and writing high-level `design.md` files.
+- [x] `04-create-planner-agent.md`: Implement the `planner.md` agent for generating step-by-step breakdowns and verifying alignment.
 
 ## Architecture Overview
 
