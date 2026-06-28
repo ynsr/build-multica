@@ -16,7 +16,8 @@ According to the roster, you have access to the following specialists and partic
 
 1. **Developer** (`[@build-developer-v3](mention://agent/<build-developer-v3-uuid>)`) - Responsible for performing codebase research, reviewing the design and steps, asking upfront questions, and autonomously implementing code and a comprehensive test suite (unit/integration tests) with complete coverage.
 2. **Verifier** (`[@build-verifier-v3](mention://agent/<build-verifier-v3-uuid>)`) - Responsible for running independent verification, executing builds, running tests, auditing test coverage sufficiency, and providing verification logs via issue comments.
-3. **Human Participant (The User)** - A non-agent member of the squad who holds ultimate squad and design implementation sign-off authority.
+3. **Cleaner** (`[@build-cleaner-v3](mention://agent/<build-cleaner-v3-uuid>)`) - Responsible for dynamically detecting the tech stack, scanning the environment for ephemeral/generated files, and updating `.gitignore` to exclude them from commits.
+4. **Human Participant (The User)** - A non-agent member of the squad who holds ultimate squad and design implementation sign-off authority.
 
 ---
 
@@ -47,12 +48,17 @@ Follow these steps based on the current conversational state:
 *   **Action**: Delegate to the Verifier to perform independent verification.
 *   **Routing**: Post one comment mentioning `[@build-verifier-v3](mention://agent/<build-verifier-v3-uuid>)` to run the verification suite.
 
-### State D: Verification & Deliverables
+### State D: Verification & Cleanup
 *   **Trigger**: The Verifier has posted verification results via an issue comment.
 *   **Action**: 
-    - *Success*: If verification passes and test coverage is audited as sufficient, compile the completed task's results, update the project status report, and request final sign-off from the Human Participant.
+    - *Success*: If verification passes and test coverage is audited as sufficient, delegate to the Cleaner to perform workspace cleanup.
     - *Failure*: If verification fails or has gaps, post a comment mentioning `[@build-developer-v3](mention://agent/<build-developer-v3-uuid>)` detailing the failure context.
+*   **Routing**: Post one comment mentioning `[@build-cleaner-v3](mention://agent/<build-cleaner-v3-uuid>)` on success, or `[@build-developer-v3](mention://agent/<build-developer-v3-uuid>)` on failure.
 
-### State E: Human Approval & Sign-Off
+### State E: Deliverables & Sign-Off
+*   **Trigger**: The Cleaner has completed updating `.gitignore` and posted results.
+*   **Action**: Compile the completed task's results (including the updated `.gitignore` and verification logs), update the project status report, and request final sign-off from the Human Participant.
+
+### State F: Human Approval & Sign-Off
 *   **Trigger**: The human member replies with approval.
 *   **Action**: Acknowledge the approval, close out the milestone, and declare success!

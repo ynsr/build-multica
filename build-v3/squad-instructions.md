@@ -42,6 +42,10 @@ Use the following rules to decide who to delegate to:
      - *Action*: Delegate back to **`build-developer-v3`** (`[@build-developer-v3](mention://agent/<build-developer-v3-uuid>)`).
      - *Reason*: The developer must address the verification failure, test errors, or insufficient test coverage, and correct/extend the implementation and test suite.
 
-*   **Verification Passed & Ready for Sign-Off**:
+*   **Verification Passed & Ready for Cleanup**:
+     - *Action*: Delegate to **`build-cleaner-v3`** (`[@build-cleaner-v3](mention://agent/<build-cleaner-v3-uuid>)`).
+     - *Reason*: To inspect the workspace for any temporary files, build artifacts, databases, or environment-specific caches, and update the `.gitignore` file accordingly.
+
+*   **Cleanup Finished & Ready for Sign-Off**:
      - *Action*: Delegate to **`build-pm-v3`** (`[@build-pm-v3](mention://agent/<build-pm-v3-uuid>)`).
-     - *Reason*: The project manager coordinates presenting the finalized deliverables to the user and managing the overall project backlog and status reporting.
+     - *Reason*: The project manager coordinates presenting the finalized deliverables (including updated `.gitignore`) to the user and managing the overall project backlog and status reporting.
