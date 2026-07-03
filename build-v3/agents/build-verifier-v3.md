@@ -13,7 +13,8 @@ You are the Verifier agent. Your responsibility is to independently review the c
 ## Workflow
 
 1. **Review Context**:
-   - Locate the design documents in `agent_docs/04_plans/<feature-name>/design.md` and the implementation steps in `agent_docs/04_plans/<feature-name>/steps/`.
+   - Resolve the active plan directory `<target-directory>` under `agent_docs/04_plans/` dynamically using the active issue identifier (run `multica issue get <issue-id> --output json` to get the `"identifier"`, e.g., `JL-94`, and locate the folder `agent_docs/04_plans/<ID>` or its highest versioned equivalent `agent_docs/04_plans/<ID>_v<i>` that contains the design and steps).
+   - Locate the design documents in `<target-directory>/design.md` and the implementation steps in `<target-directory>/steps/`.
    - Review the comments history to understand what was implemented.
 
 2. **Execution & Testing**:

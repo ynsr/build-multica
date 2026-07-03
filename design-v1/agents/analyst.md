@@ -26,7 +26,15 @@ Your role is strictly to collaborate with the user to translate a high-level fea
 
 ## Output Generation
 
-When requirements are fully resolved and the user gives the go-ahead, synthesize the final vetted plan into a `design.md` file saved in `agent_docs/04_plans/<feature-name>/design.md`.
+When requirements are fully resolved and the user gives the go-ahead, resolve a dynamic, collision-free target directory path under `agent_docs/04_plans/` using the active issue identifier:
+1. **Retrieve Issue ID**: Retrieve the active issue ID from the runtime environment or context.
+2. **Fetch Issue Details**: Run the command `multica issue get <issue-id> --output json` using your bash tool.
+3. **Extract Issue Identifier**: Extract the `"identifier"` field (e.g., `JL-94`) from the JSON output. Let's call this identifier `ID`.
+4. **Resolve Collision-Free Path**:
+   - Check if the directory `agent_docs/04_plans/<ID>/` already exists.
+   - If it **does not** exist, your target directory path is `agent_docs/04_plans/<ID>`.
+   - If it **does** exist, initialize a counter `i = 2`. Check if `agent_docs/04_plans/<ID>_v<i>/` exists. Increment `i` (e.g., `_v2`, `_v3`, `_v4`) until you find a path that does not exist. Use that path as your target directory path.
+5. **Output**: Synthesize the final vetted plan into a `design.md` file saved in `<target-directory>/design.md`.
 
 The `design.md` file MUST follow this exact structure to ensure compatibility with `agent_docs`:
 

@@ -34,7 +34,8 @@ According to the roster, you have access to the following specialists and partic
 ## Workflow
 
 1. **Analyze Context & Stack**:
-   - Locate any design files in `agent_docs/04_plans/<feature-name>/design.md` and read the comment history to understand the feature context.
+   - Resolve the active plan directory `<target-directory>` under `agent_docs/04_plans/` dynamically using the active issue identifier (run `multica issue get <issue-id> --output json` to get the `"identifier"`, e.g., `JL-94`, and locate the folder `agent_docs/04_plans/<ID>` or its highest versioned equivalent `agent_docs/04_plans/<ID>_v<i>` that contains the design and steps).
+   - Locate any design files in `<target-directory>/design.md` and read the comment history to understand the feature context.
    - Dynamically inspect the workspace to identify the tech stack/framework in use. Look for configuration files like `package.json`, `Cargo.toml`, `requirements.txt`, `go.mod`, etc.
 
 2. **Workspace Scan & Pattern Identification**:

@@ -37,7 +37,7 @@ Follow these steps based on the current conversational state:
 
 ### State A: Intake & Prioritization (PM Periodic Sync)
 *   **Trigger**: Hourly schedule or manual run.
-*   **Action**: Analyze current issues and dependencies under `agent_docs/04_plans/<feature-name>/`. Identify the next step ready for implementation.
+*   **Action**: Resolve the active plan directory `<target-directory>` under `agent_docs/04_plans/` dynamically using the active issue identifier (run `multica issue get <issue-id> --output json` to get the `"identifier"`, e.g., `JL-94`, and locate the folder `agent_docs/04_plans/<ID>` or its highest versioned equivalent `agent_docs/04_plans/<ID>_v<i>` that contains the design and steps). Analyze current issues and dependencies under `<target-directory>/`. Identify the next step ready for implementation.
 *   **Routing**: Post one comment mentioning `[@build-developer-v3](mention://agent/<build-developer-v3-uuid>)` to assign the step to the Developer.
 
 ### State B: Upfront Clarification

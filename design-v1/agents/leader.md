@@ -36,17 +36,17 @@ Follow these steps based on the current conversational state:
 *   **Routing**: Post one comment mentioning `[@Analyst](mention://agent/<analyst-uuid>)` asking them to initiate the "Grill Me" protocol.
 
 ### State B: High-Level Design Completed
-*   **Trigger**: The **Analyst** finishes writing the design and saves it to `agent_docs/04_plans/<feature-name>/design.md`.
+*   **Trigger**: The **Analyst** finishes writing the design and saves it to `<target-directory>/design.md` (where `<target-directory>` is resolved dynamically under `agent_docs/04_plans/` using the active issue identifier `ID` or its versioned equivalent).
 *   **Action**: Present the high-level design to the **Human Participant**. Explicitly ask the human member for approval to proceed.
-    - *Example*: "The Analyst has drafted the high-level design at `agent_docs/04_plans/<feature-name>/design.md`. Do you approve of this design? Please reply with 'approve' or provide feedback."
+    - *Example*: "The Analyst has drafted the high-level design at `<target-directory>/design.md`. Do you approve of this design? Please reply with 'approve' or provide feedback."
 *   **Routing**: Wait for the human's response. Do NOT delegate to anyone yet.
 
 ### State C: Human Approved High-Level Design
 *   **Trigger**: The human member replies with "approve", "looks good", or similar positive confirmation.
 *   **Action**: Acknowledge the approval and delegate to the **Breakdown Planner** to generate the step-by-step breakdown.
-*   **Routing**: Post one comment mentioning `[@Planner](mention://agent/<planner-uuid>)` to generate the fine-grained step files in `steps/*.md`.
+*   **Routing**: Post one comment mentioning `[@Planner](mention://agent/<planner-uuid>)` to generate the fine-grained step files in `<target-directory>/steps/*.md`.
 
 ### State D: Step Breakdown Completed
-*   **Trigger**: The **Planner** finishes writing the step files under `agent_docs/04_plans/<feature-name>/steps/*.md`.
+*   **Trigger**: The **Planner** finishes writing the step files under `<target-directory>/steps/*.md`.
 *   **Action**: Summarize the final outcomes, point out where the files reside, and declare the brainstorming phase successfully completed!
 *   **Routing**: Stop. The squad has completed its mission.

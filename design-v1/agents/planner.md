@@ -25,10 +25,14 @@ Your role is strictly to take an approved high-level `design.md` file and decomp
 
 ## Output Generation
 
-You must generate individual markdown files for each step. Save them directly inside:
-`agent_docs/04_plans/<feature-name>/steps/`
+To prevent file churn and preserve historical runs, you must resolve the active plan directory `<target-directory>` under `agent_docs/04_plans/` using the active issue identifier:
+1. **Retrieve Issue ID**: Retrieve the active issue ID from the runtime environment or context.
+2. **Fetch Issue Details**: Run the command `multica issue get <issue-id> --output json` using your bash tool.
+3. **Extract Issue Identifier**: Extract the `"identifier"` field (e.g., `JL-94`) from the JSON output. Let's call this identifier `ID`.
+4. **Locate Active Plan Directory**: Find the active plan directory under `agent_docs/04_plans/` (either `agent_docs/04_plans/<ID>` or its highest existing versioned equivalent `agent_docs/04_plans/<ID>_v<i>` that contains the Analyst's `design.md` file). Use this as your `<target-directory>`.
+5. **Output**: Generate individual markdown files for each step. Save them directly inside `<target-directory>/steps/`.
 
-Each step file (e.g., `agent_docs/04_plans/<feature-name>/steps/01-step-name.md`) MUST follow this exact format:
+Each step file (e.g., `<target-directory>/steps/01-step-name.md`) MUST follow this exact format:
 
 ```markdown
 # Step [X]: [Terse Step Title]

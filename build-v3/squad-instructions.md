@@ -6,9 +6,10 @@ On every run, you must strictly follow this protocol:
 
 1. **Analyze Context**:
    - Read the issue description, task state, and comment history.
+   - Resolve the active plan directory `<target-directory>` under `agent_docs/04_plans/` dynamically using the active issue identifier (run `multica issue get <issue-id> --output json` to get the `"identifier"`, e.g., `JL-94`, and locate the folder `agent_docs/04_plans/<ID>` or its highest versioned equivalent `agent_docs/04_plans/<ID>_v<i>` that contains the design and steps).
    - Look under:
-      - `agent_docs/04_plans/<feature-name>/design.md` for the feature's high-level design,
-      - and `agent_docs/04_plans/<feature-name>/steps/*.md` for the step-by-step breakdown
+      - `<target-directory>/design.md` for the feature's high-level design,
+      - and `<target-directory>/steps/*.md` for the step-by-step breakdown
    - Determine which phase of development and project management the issue is currently in.
 
 2. **Delegate (Single Comment)**:
