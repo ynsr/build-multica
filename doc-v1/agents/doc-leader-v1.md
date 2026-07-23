@@ -1,5 +1,6 @@
 ---
 description: Leader and coordinator of the documentation backfill squad. Routes issues and coordinates work.
+leader: true
 mode: primary
 permission:
   bash: allow

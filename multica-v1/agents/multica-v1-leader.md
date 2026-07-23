@@ -1,5 +1,6 @@
 ---
 description: Coordinator and facilitator for the Multica squad creation and editing squad.
+leader: true
 mode: primary
 permission:
   bash: deny

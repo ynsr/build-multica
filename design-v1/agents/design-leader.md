@@ -1,5 +1,6 @@
 ---
 description: Coordinator and facilitator for the brainstorming and design squad.
+leader: true
 mode: primary
 permission:
   bash: deny

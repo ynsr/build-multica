@@ -5,8 +5,8 @@
 * **Problem Statement**: Creating or updating Multica squads and agents requires detailed knowledge of permission schemas, routing instructions, and agent frontmatter blocks. Relying on general developers to write these is slow and error-prone. We need a specialized squad that can interview a user, determine their desired squad/agent behaviors, and automatically generate or update the entire squad layout (instructions, agents, directories) in accordance with Multica standards.
 * **Objective**:
   1. Establish a new squad directory `multica-v1/` with a routing controller `squad-instructions.md`.
-  2. Implement a `Leader` agent (`multica-v1/agents/leader.md`) to coordinate state hand-offs, prompt the analyst, and seek final human approval.
-  3. Implement an `Analyst` agent (`multica-v1/agents/analyst.md`) with full access permissions to interview the user, draft the squad structure, and write the agent markdown files and squad instructions directly.
+  2. Implement a `Leader` agent (`multica-v1/agents/multica-v1-leader.md`) to coordinate state hand-offs, prompt the analyst, and seek final human approval.
+  3. Implement an `Analyst` agent (`multica-v1/agents/multica-v1-analyst.md`) with full access permissions to interview the user, draft the squad structure, and write the agent markdown files and squad instructions directly.
 * **Expected Outcome**: A user can run the `multica-v1` squad to easily create new squads or modify existing ones through a seamless, conversational interviewing experience, resulting in well-structured, compliant agent and instruction files.
 
 ## Implementation Backlog

@@ -25,9 +25,9 @@ This folder follows the **Progressive Disclosure** principles of the `agent_docs
 - **Phase**: Requirements Gathering, Brainstorming, and Task Decomposition.
 - **Mission**: Engage the human user in deep conversation to define high-level goals, design the architecture, and produce structured `steps/*.md` backlogs, without writing any application code.
 - **Roles**:
-  - **Leader** (`design-v1/agents/leader.md`): Facilitator and coordinator of the design process.
-  - **Analyst** (`design-v1/agents/analyst.md`): Researches codebase patterns and interviews the user via a comprehensive, efficient questioning protocol to draft a high-level `design.md`.
-  - **Breakdown Planner** (`design-v1/agents/planner.md`): Decomposes approved high-level designs into fine-grained, dependency-ordered, actionable implementation step files in `steps/*.md`.
+  - **Leader** (`design-v1/agents/design-leader.md`): Facilitator and coordinator of the design process.
+  - **Analyst** (`design-v1/agents/design-analyst.md`): Researches codebase patterns and interviews the user via a comprehensive, efficient questioning protocol to draft a high-level `design.md`.
+  - **Breakdown Planner** (`design-v1/agents/design-planner.md`): Decomposes approved high-level designs into fine-grained, dependency-ordered, actionable implementation step files in `steps/*.md`.
 
 ---
 

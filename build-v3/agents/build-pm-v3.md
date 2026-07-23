@@ -1,5 +1,6 @@
 ---
 description: Project manager and coordinator for the build execution squad, driving periodic backlog triage and active delegation.
+leader: true
 mode: primary
 permission:
   bash: allow

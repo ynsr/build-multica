@@ -1,0 +1,47 @@
+# =============================================================================
+# squads.yaml — List of squad directories that `setup.sh` installs/updates.
+#
+# This is intentionally minimal. Everything else (squad description, which
+# agent is the leader, member roles, agent descriptions, instructions) is
+# inferred automatically at install time directly from each squad folder:
+#
+#   <squad>/squad-instructions.md   → the ONE markdown file in the squad's
+#                                      root folder (not inside agents/) is
+#                                      always the squad routing instructions.
+#   <squad>/agents/<agent-name>.md  → one file per agent. The registered
+#                                      agent name is the filename (without
+#                                      .md). Each file must start with a
+#                                      YAML frontmatter block containing at
+#                                      least `description:`. The single
+#                                      agent whose frontmatter has
+#                                      `leader: true` is the squad leader;
+#                                      the squad's own description is
+#                                      inherited from the leader's
+#                                      description. Every other agent file
+#                                      becomes a squad member, with its
+#                                      display role derived from its
+#                                      filename (squad-name prefix and any
+#                                      trailing -vN suffix are stripped,
+#                                      remaining hyphenated words are
+#                                      title-cased — e.g.
+#                                      `build-developer-v3` → "Developer",
+#                                      `review-conflict-resolver-v1` →
+#                                      "Conflict Resolver").
+#
+# To add a new squad:
+#   1. Create `<squad>/squad-instructions.md` and `<squad>/agents/*.md`
+#      (one agent file must set `leader: true` in its frontmatter).
+#   2. Add its folder name to the list below.
+#
+# To remove/skip a squad temporarily, delete or comment out its line here —
+# no need to delete the folder.
+#
+# Order below is the order squads are processed/reported in.
+# =============================================================================
+squads:
+  - multica-v1
+  - exec-v1
+  - design-v1
+  - build-v3
+  - doc-v1
+  - review-v1

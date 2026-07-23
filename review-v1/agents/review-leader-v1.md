@@ -1,5 +1,6 @@
 ---
 description: Coordinator, router, and status verifier for the PR review squad.
+leader: true
 mode: primary
 permission:
   bash: allow

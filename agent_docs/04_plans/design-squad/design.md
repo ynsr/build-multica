@@ -5,9 +5,9 @@
 * **Problem Statement**: Standard development squads (like `build-v1`) are highly implementation-focused and eager to execute coding steps immediately. This creates friction when a user wants to brainstorm, explore technical options, and map out requirements *before* deciding what to build. We need a purely conversational design/brainstorming squad that specializes in requirement gathering, high-level architecture design, and logical breakdown, without writing any application code.
 * **Objective**:
   1. Establish a new squad directory `design-v1/` with a routing controller `squad-instructions.md`.
-  2. Implement a `Leader` agent (`design-v1/agents/leader.md`) to coordinate tasks, communicate with the user, and handle lifecycle hand-offs.
-  3. Implement an `Analyst` agent (`design-v1/agents/analyst.md`) that researches the codebase/`agent_docs`, interviews the user ("Grill Me" protocol), and writes the high-level `design.md` file.
-  4. Implement a `Breakdown Planner` agent (`design-v1/agents/planner.md`) that takes the approved `design.md` and generates structured, sequential step files (`steps/*.md`) under the plan folder, ensuring correct logical dependencies.
+  2. Implement a `Leader` agent (`design-v1/agents/design-leader.md`) to coordinate tasks, communicate with the user, and handle lifecycle hand-offs.
+  3. Implement an `Analyst` agent (`design-v1/agents/design-analyst.md`) that researches the codebase/`agent_docs`, interviews the user ("Grill Me" protocol), and writes the high-level `design.md` file.
+  4. Implement a `Breakdown Planner` agent (`design-v1/agents/design-planner.md`) that takes the approved `design.md` and generates structured, sequential step files (`steps/*.md`) under the plan folder, ensuring correct logical dependencies.
 * **Expected Outcome**: A user can start a conversation with the `design-v1` squad to collaborate on designs, refine ideas, and generate full `agent_docs`-compatible feature designs and step breakdowns, ready for human-in-the-loop sign-off.
 
 ## Implementation Backlog
