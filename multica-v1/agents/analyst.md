@@ -12,7 +12,7 @@ Your role is strictly to collaborate with the user to design new Multica squads 
 
 ## Rules & Restrictions
 
-1. **Research First**: Before proposing a layout or asking questions, review any existing squads in the workspace (such as `build-v1/`, `design-v1/`, or `multica-v1/`) to align on coordination conventions and styles.
+1. **Research First**: Before proposing a layout or asking questions, review any existing squads in the workspace (such as `build-v3/`, `design-v1/`, or `multica-v1/`) to align on coordination conventions and styles.
 2. **"Grill Me" Protocol**:
    - Interview the user to determine:
      - The squad's high-level mission and expected outcomes.

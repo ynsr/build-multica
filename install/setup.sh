@@ -1,87 +1,53 @@
 #!/usr/bin/env bash
 # =============================================================================
-# idempotent-setup-all.sh — Consolidated Idempotent Squad Setup
+# setup.sh — Idempotent Multica Squad Installer
 #
-# Replaces: 01-setup-multica-v1-instructions.sh through 06-setup-review-v1.sh
+# Reads squad/agent instructions directly from this repository (the repo IS
+# the source of truth — no cache, no network fetch) and creates or updates
+# every squad/agent defined here so that Multica always matches what's
+# checked in.
+#
 # Features:
-#   ✅ Idempotent — re-running catches existing items and updates them
-#   ✅ Placeholder resolution — <agent-uuid> replaced with actual UUIDs
-#   ✅ Local instruction cache at CACHE_DIR
-#   ✅ Cross-squad agent references handled
+#   ✅ Idempotent   — safe to re-run any number of times (updates in place)
+#   ✅ Local-first  — reads squad-instructions.md / agents/*.md from this repo
+#   ✅ Placeholder resolution — <agent-name-uuid> replaced with real UUIDs
+#   ✅ Dynamic runtime discovery — queried live at install time, never cached
 #
 # Usage:
-#   export RUNTIME_ID="9caa8431-d35e-4463-9e4a-0a572e0d9a6a"  # optional
-#   bash idempotent-setup-all.sh
+#   bash install/setup.sh
+#
+#   # Optional: skip the runtime prompt by pinning a runtime explicitly
+#   RUNTIME_ID="<runtime-uuid>" bash install/setup.sh
+#
+#   # Optional: override the HTTP timeout used for large instruction payloads
+#   MULTICA_HTTP_TIMEOUT="180s" bash install/setup.sh
 # =============================================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+export REPO_ROOT
 export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
-# ── Config ───────────────────────────────────────────────────────────────────
-RUNTIME_ID="${RUNTIME_ID:-9caa8431-d35e-4463-9e4a-0a572e0d9a6a}"
-CACHE_DIR="/home/bs/.hermes/cache/build-multica-instructions"
-BASE_URL="https://raw.githubusercontent.com/jefflunt/build-multica/main"
+# ── Load shared library ─────────────────────────────────────────────────────
+source "${SCRIPT_DIR}/lib.sh"
 
 echo "╔══════════════════════════════════════════════════════════════════════╗"
-echo "║  build-multica → Projectx — Idempotent Squad Setup                   ║"
-echo "║  Runtime: $RUNTIME_ID"
+echo "║  build-multica — Idempotent Squad Setup                              ║"
 echo "╚══════════════════════════════════════════════════════════════════════╝"
 echo ""
 
-# ── Load shared library ─────────────────────────────────────────────────────
-source "${SCRIPT_DIR}/shared.sh"
+# ── Step 0: Resolve the runtime to run every agent on ───────────────────────
+echo "🔧 Step 0: Resolving runtime..."
+echo "──────────────────────────────────────────────────────────"
+RUNTIME_ID="$(select_runtime)"
+echo ""
 
-# ── Prime the agent + squad maps ───────────────────────────────────────────
-echo "📡 Step 0: Pre-fetching workspace state..."
+# ── Step 1: Prime the agent + squad maps ────────────────────────────────────
+echo "📡 Step 1: Pre-fetching workspace state..."
 echo "──────────────────────────────────────────────────────────"
 init_agent_map
 init_squad_map
-echo ""
-
-# ── Fetch any missing cached instructions ──────────────────────────────────
-echo "💾 Step 0.5: Ensuring cached instructions..."
-echo "──────────────────────────────────────────────────────────"
-mkdir -p "$CACHE_DIR"
-
-CACHE_FILES=(
-  "exec-v1 squad-instructions.md exec-v1.md"
-  "exec-v1 exec-leader-v1.md"
-  "build-v3 squad-instructions.md build-v3.md"
-  "build-v3 build-pm-v3.md"
-  "build-v3 build-developer-v3.md"
-  "build-v3 build-verifier-v3.md"
-  "build-v3 build-cleaner-v3.md"
-  "build-v3 build-commiter-v3.md"
-  "design-v1 squad-instructions.md design-v1.md"
-  "design-v1 leader.md design-leader.md"
-  "design-v1 analyst.md design-analyst.md"
-  "design-v1 planner.md design-planner.md"
-  "doc-v1 squad-instructions.md doc-v1.md"
-  "doc-v1 doc-leader-v1.md"
-  "doc-v1 doc-auditor-v1.md"
-  "doc-v1 doc-writer-v1.md"
-  "doc-v1 doc-verifier-v1.md"
-  "review-v1 squad-instructions.md review-v1.md"
-  "review-v1 review-leader-v1.md"
-  "review-v1 review-describer-v1.md"
-  "review-v1 review-defender-v1.md"
-  "review-v1 review-critiquer-v1.md"
-  "review-v1 review-conflict-resolver-v1.md"
-  "multica-v1 squad-instructions.md multica-v1.md"
-  "multica-v1 leader.md multica-leader.md"
-  "multica-v1 analyst.md multica-analyst.md"
-)
-for entry in "${CACHE_FILES[@]}"; do
-  read -r squad gh_file local_file <<< "$entry"
-  local_path="${CACHE_DIR}/${squad}/${local_file}"
-  if [[ ! -f "$local_path" ]]; then
-    mkdir -p "${CACHE_DIR}/${squad}"
-    echo "  → Fetching ${squad}/${gh_file}..."
-    curl -sL --max-time 30 "${BASE_URL}/${squad}/${gh_file}" -o "$local_path" 2>&1 || echo "  ⚠ Failed to fetch ${squad}/${gh_file}"
-  fi
-done
-echo "  ✓ All cached instructions ready."
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -90,24 +56,20 @@ echo ""
 echo "📦 Squad 1/6: multica-v1 — Squad Creator & Modifier"
 echo "──────────────────────────────────────────────────────────"
 
-# Resolve instructions with placeholders
-INSTR_LEADER_MV1=$(cat "${CACHE_DIR}/multica-v1/multica-leader.md" 2>/dev/null || load_cached_instruction "multica-v1" "leader.md")
+INSTR_LEADER_MV1=$(load_instruction "multica-v1" "agents/leader.md")
 INSTR_LEADER_MV1=$(resolve_placeholders "$INSTR_LEADER_MV1" "multica-v1")
 
-INSTR_ANALYST_MV1=$(cat "${CACHE_DIR}/multica-v1/multica-analyst.md" 2>/dev/null || load_cached_instruction "multica-v1" "analyst.md")
+INSTR_ANALYST_MV1=$(load_instruction "multica-v1" "agents/analyst.md")
 INSTR_ANALYST_MV1=$(resolve_placeholders "$INSTR_ANALYST_MV1" "multica-v1")
 
-INSTR_SQUAD_MV1=$(cat "${CACHE_DIR}/multica-v1/multica-v1.md" 2>/dev/null || load_cached_instruction "multica-v1" "squad-instructions.md")
+INSTR_SQUAD_MV1=$(load_instruction "multica-v1" "squad-instructions.md")
 INSTR_SQUAD_MV1=$(resolve_placeholders "$INSTR_SQUAD_MV1" "multica-v1")
 
-# Create agents
 AGENT_MV1_LEADER=$(upsert_agent "multica-v1-leader" "$RUNTIME_ID" "Coordinator for squad creation squad" "$INSTR_LEADER_MV1")
 AGENT_MV1_ANALYST=$(upsert_agent "multica-v1-analyst" "$RUNTIME_ID" "Technical interviewer — writes squad/agent configs" "$INSTR_ANALYST_MV1")
 
-# Create / update squad
 SQUAD_MV1_ID=$(upsert_squad "multica-v1" "$AGENT_MV1_LEADER" "Squad creator & modifier — Grill Me protocol for designing squads" "$INSTR_SQUAD_MV1")
 
-# Add non-leader member
 if [[ -n "$SQUAD_MV1_ID" ]]; then
   upsert_squad_member "$SQUAD_MV1_ID" "$AGENT_MV1_ANALYST" "Analyst"
 fi
@@ -119,10 +81,10 @@ echo ""
 echo "📦 Squad 2/6: exec-v1 — Daily Executive Check-In"
 echo "──────────────────────────────────────────────────────────"
 
-INSTR_LEADER_EXEC=$(cat "${CACHE_DIR}/exec-v1/exec-leader-v1.md" 2>/dev/null || load_cached_instruction "exec-v1" "agents/exec-leader-v1.md")
+INSTR_LEADER_EXEC=$(load_instruction "exec-v1" "agents/exec-leader-v1.md")
 INSTR_LEADER_EXEC=$(resolve_placeholders "$INSTR_LEADER_EXEC" "exec-v1")
 
-INSTR_SQUAD_EXEC=$(cat "${CACHE_DIR}/exec-v1/exec-v1.md" 2>/dev/null || load_cached_instruction "exec-v1" "squad-instructions.md")
+INSTR_SQUAD_EXEC=$(load_instruction "exec-v1" "squad-instructions.md")
 INSTR_SQUAD_EXEC=$(resolve_placeholders "$INSTR_SQUAD_EXEC" "exec-v1")
 
 AGENT_EXEC_LEADER=$(upsert_agent "exec-leader-v1" "$RUNTIME_ID" "Executive leader — daily briefings, on-demand execution, evening wraps" "$INSTR_LEADER_EXEC")
@@ -135,16 +97,16 @@ echo ""
 echo "📦 Squad 3/6: design-v1 — Conversational Planning & Breakdown"
 echo "──────────────────────────────────────────────────────────"
 
-INSTR_LEADER_DESIGN=$(cat "${CACHE_DIR}/design-v1/design-leader.md" 2>/dev/null || load_cached_instruction "design-v1" "agents/leader.md")
+INSTR_LEADER_DESIGN=$(load_instruction "design-v1" "agents/leader.md")
 INSTR_LEADER_DESIGN=$(resolve_placeholders "$INSTR_LEADER_DESIGN" "design-v1")
 
-INSTR_ANALYST_DESIGN=$(cat "${CACHE_DIR}/design-v1/design-analyst.md" 2>/dev/null || load_cached_instruction "design-v1" "agents/analyst.md")
+INSTR_ANALYST_DESIGN=$(load_instruction "design-v1" "agents/analyst.md")
 INSTR_ANALYST_DESIGN=$(resolve_placeholders "$INSTR_ANALYST_DESIGN" "design-v1")
 
-INSTR_PLANNER_DESIGN=$(cat "${CACHE_DIR}/design-v1/design-planner.md" 2>/dev/null || load_cached_instruction "design-v1" "agents/planner.md")
+INSTR_PLANNER_DESIGN=$(load_instruction "design-v1" "agents/planner.md")
 INSTR_PLANNER_DESIGN=$(resolve_placeholders "$INSTR_PLANNER_DESIGN" "design-v1")
 
-INSTR_SQUAD_DESIGN=$(cat "${CACHE_DIR}/design-v1/design-v1.md" 2>/dev/null || load_cached_instruction "design-v1" "squad-instructions.md")
+INSTR_SQUAD_DESIGN=$(load_instruction "design-v1" "squad-instructions.md")
 INSTR_SQUAD_DESIGN=$(resolve_placeholders "$INSTR_SQUAD_DESIGN" "design-v1")
 
 AGENT_DESIGN_LEADER=$(upsert_agent "design-leader" "$RUNTIME_ID" "Design leader — facilitates design approval & step breakdown" "$INSTR_LEADER_DESIGN")
@@ -165,22 +127,22 @@ echo ""
 echo "📦 Squad 4/6: build-v3 — Adaptive Project Management & Execution"
 echo "──────────────────────────────────────────────────────────"
 
-INSTR_PM_BUILD=$(cat "${CACHE_DIR}/build-v3/build-pm-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "agents/build-pm-v3.md")
+INSTR_PM_BUILD=$(load_instruction "build-v3" "agents/build-pm-v3.md")
 INSTR_PM_BUILD=$(resolve_placeholders "$INSTR_PM_BUILD" "build-v3")
 
-INSTR_DEV_BUILD=$(cat "${CACHE_DIR}/build-v3/build-developer-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "agents/build-developer-v3.md")
+INSTR_DEV_BUILD=$(load_instruction "build-v3" "agents/build-developer-v3.md")
 INSTR_DEV_BUILD=$(resolve_placeholders "$INSTR_DEV_BUILD" "build-v3")
 
-INSTR_VERIFIER_BUILD=$(cat "${CACHE_DIR}/build-v3/build-verifier-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "agents/build-verifier-v3.md")
+INSTR_VERIFIER_BUILD=$(load_instruction "build-v3" "agents/build-verifier-v3.md")
 INSTR_VERIFIER_BUILD=$(resolve_placeholders "$INSTR_VERIFIER_BUILD" "build-v3")
 
-INSTR_CLEANER_BUILD=$(cat "${CACHE_DIR}/build-v3/build-cleaner-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "agents/build-cleaner-v3.md")
+INSTR_CLEANER_BUILD=$(load_instruction "build-v3" "agents/build-cleaner-v3.md")
 INSTR_CLEANER_BUILD=$(resolve_placeholders "$INSTR_CLEANER_BUILD" "build-v3")
 
-INSTR_COMMITER_BUILD=$(cat "${CACHE_DIR}/build-v3/build-commiter-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "agents/build-commiter-v3.md")
+INSTR_COMMITER_BUILD=$(load_instruction "build-v3" "agents/build-commiter-v3.md")
 INSTR_COMMITER_BUILD=$(resolve_placeholders "$INSTR_COMMITER_BUILD" "build-v3")
 
-INSTR_SQUAD_BUILD=$(cat "${CACHE_DIR}/build-v3/build-v3.md" 2>/dev/null || load_cached_instruction "build-v3" "squad-instructions.md")
+INSTR_SQUAD_BUILD=$(load_instruction "build-v3" "squad-instructions.md")
 INSTR_SQUAD_BUILD=$(resolve_placeholders "$INSTR_SQUAD_BUILD" "build-v3")
 
 AGENT_BUILD_PM=$(upsert_agent "build-pm-v3" "$RUNTIME_ID" "Project manager — backlog triage, delegation, sign-off" "$INSTR_PM_BUILD")
@@ -205,19 +167,19 @@ echo ""
 echo "📦 Squad 5/6: doc-v1 — Documentation Backfill"
 echo "──────────────────────────────────────────────────────────"
 
-INSTR_LEADER_DOC=$(cat "${CACHE_DIR}/doc-v1/doc-leader-v1.md" 2>/dev/null || load_cached_instruction "doc-v1" "agents/doc-leader-v1.md")
+INSTR_LEADER_DOC=$(load_instruction "doc-v1" "agents/doc-leader-v1.md")
 INSTR_LEADER_DOC=$(resolve_placeholders "$INSTR_LEADER_DOC" "doc-v1")
 
-INSTR_AUDITOR_DOC=$(cat "${CACHE_DIR}/doc-v1/doc-auditor-v1.md" 2>/dev/null || load_cached_instruction "doc-v1" "agents/doc-auditor-v1.md")
+INSTR_AUDITOR_DOC=$(load_instruction "doc-v1" "agents/doc-auditor-v1.md")
 INSTR_AUDITOR_DOC=$(resolve_placeholders "$INSTR_AUDITOR_DOC" "doc-v1")
 
-INSTR_WRITER_DOC=$(cat "${CACHE_DIR}/doc-v1/doc-writer-v1.md" 2>/dev/null || load_cached_instruction "doc-v1" "agents/doc-writer-v1.md")
+INSTR_WRITER_DOC=$(load_instruction "doc-v1" "agents/doc-writer-v1.md")
 INSTR_WRITER_DOC=$(resolve_placeholders "$INSTR_WRITER_DOC" "doc-v1")
 
-INSTR_VERIFIER_DOC=$(cat "${CACHE_DIR}/doc-v1/doc-verifier-v1.md" 2>/dev/null || load_cached_instruction "doc-v1" "agents/doc-verifier-v1.md")
+INSTR_VERIFIER_DOC=$(load_instruction "doc-v1" "agents/doc-verifier-v1.md")
 INSTR_VERIFIER_DOC=$(resolve_placeholders "$INSTR_VERIFIER_DOC" "doc-v1")
 
-INSTR_SQUAD_DOC=$(cat "${CACHE_DIR}/doc-v1/doc-v1.md" 2>/dev/null || load_cached_instruction "doc-v1" "squad-instructions.md")
+INSTR_SQUAD_DOC=$(load_instruction "doc-v1" "squad-instructions.md")
 INSTR_SQUAD_DOC=$(resolve_placeholders "$INSTR_SQUAD_DOC" "doc-v1")
 
 AGENT_DOC_LEADER=$(upsert_agent "doc-leader-v1" "$RUNTIME_ID" "Doc leader — intake, coordination, final approval" "$INSTR_LEADER_DOC")
@@ -240,22 +202,22 @@ echo ""
 echo "📦 Squad 6/6: review-v1 — PR Analysis & Defense"
 echo "──────────────────────────────────────────────────────────"
 
-INSTR_LEADER_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-leader-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "agents/review-leader-v1.md")
+INSTR_LEADER_REVIEW=$(load_instruction "review-v1" "agents/review-leader-v1.md")
 INSTR_LEADER_REVIEW=$(resolve_placeholders "$INSTR_LEADER_REVIEW" "review-v1")
 
-INSTR_DESCRIBER_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-describer-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "agents/review-describer-v1.md")
+INSTR_DESCRIBER_REVIEW=$(load_instruction "review-v1" "agents/review-describer-v1.md")
 INSTR_DESCRIBER_REVIEW=$(resolve_placeholders "$INSTR_DESCRIBER_REVIEW" "review-v1")
 
-INSTR_DEFENDER_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-defender-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "agents/review-defender-v1.md")
+INSTR_DEFENDER_REVIEW=$(load_instruction "review-v1" "agents/review-defender-v1.md")
 INSTR_DEFENDER_REVIEW=$(resolve_placeholders "$INSTR_DEFENDER_REVIEW" "review-v1")
 
-INSTR_CRITIQUER_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-critiquer-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "agents/review-critiquer-v1.md")
+INSTR_CRITIQUER_REVIEW=$(load_instruction "review-v1" "agents/review-critiquer-v1.md")
 INSTR_CRITIQUER_REVIEW=$(resolve_placeholders "$INSTR_CRITIQUER_REVIEW" "review-v1")
 
-INSTR_RESOLVER_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-conflict-resolver-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "agents/review-conflict-resolver-v1.md")
+INSTR_RESOLVER_REVIEW=$(load_instruction "review-v1" "agents/review-conflict-resolver-v1.md")
 INSTR_RESOLVER_REVIEW=$(resolve_placeholders "$INSTR_RESOLVER_REVIEW" "review-v1")
 
-INSTR_SQUAD_REVIEW=$(cat "${CACHE_DIR}/review-v1/review-v1.md" 2>/dev/null || load_cached_instruction "review-v1" "squad-instructions.md")
+INSTR_SQUAD_REVIEW=$(load_instruction "review-v1" "squad-instructions.md")
 INSTR_SQUAD_REVIEW=$(resolve_placeholders "$INSTR_SQUAD_REVIEW" "review-v1")
 
 AGENT_REVIEW_LEADER=$(upsert_agent "review-leader-v1" "$RUNTIME_ID" "Review leader — coordinates PR checks, final status" "$INSTR_LEADER_REVIEW")
