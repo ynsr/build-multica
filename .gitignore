@@ -3,3 +3,6 @@
 .multica/
 .opencode/
 AGENTS.md
+*.log
+*.backup
+*.tmp
